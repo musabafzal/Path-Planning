@@ -217,12 +217,12 @@ int main() {
 
       if (s != "") {
         auto j = json::parse(s);
-        
+
         string event = j[0].get<string>();
-        
+
         if (event == "telemetry") {
           // j[1] is the data JSON object
-          
+
           // Main car's localization Data
             double car_x = j[1]["x"];
             double car_y = j[1]["y"];
@@ -234,7 +234,7 @@ int main() {
             // Previous path data given to the Planner
             auto previous_path_x = j[1]["previous_path_x"];
             auto previous_path_y = j[1]["previous_path_y"];
-            // Previous path's end s and d values 
+            // Previous path's end s and d values
             double end_path_s = j[1]["end_path_s"];
             double end_path_d = j[1]["end_path_d"];
 
@@ -247,6 +247,8 @@ int main() {
               car_s = end_path_s;
             }
 
+            //Prediction
+            
             bool too_close=false;
             bool left_notfree_forward=false;
             bool left_notfree_backward=false;
@@ -258,6 +260,7 @@ int main() {
 
             bool space_on_left=false;
             bool space_on_right=false;
+
 
 
             for ( int i = 0; i < sensor_fusion.size(); i++ ) {
@@ -277,7 +280,7 @@ int main() {
               }
 
               if(d<(2+4*(lane-1)+2)&&d>(2+4*(lane-1)-2)){
-                
+
                 if((check_car_s>car_s)&&((check_car_s-car_s)<40)){
                   left_notfree_forward=true;
                 }
@@ -305,6 +308,8 @@ int main() {
 
             }
 
+            //Behavior
+
             if(lane==0){
               space_on_right=true;
             }else if(lane==1){
@@ -326,7 +331,7 @@ int main() {
               ref_vel+=.224;
             }
 
-
+            //Trajectory generation
 
             vector<double> ptsx;
             vector<double> ptsy;
@@ -335,7 +340,7 @@ int main() {
             double ref_y = car_y;
             double ref_yaw = deg2rad(car_yaw);
 
-            
+
 
             if ( prev_size < 2 ) {
 
@@ -348,7 +353,7 @@ int main() {
                 ptsy.push_back(prev_car_y);
                 ptsy.push_back(car_y);
             } else {
-              
+
                 ref_x = previous_path_x[prev_size - 1];
                 ref_y = previous_path_y[prev_size - 1];
 
@@ -435,7 +440,7 @@ int main() {
 
             //this_thread::sleep_for(chrono::milliseconds(1000));
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          
+
         }
       } else {
         // Manual driving
